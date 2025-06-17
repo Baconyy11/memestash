@@ -2,135 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Memestash</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&display=swap" rel="stylesheet"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet"/>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: #f2f2f2;
+      background: linear-gradient(135deg, #e0f7fa, #fff);
+      margin: 0;
+      padding: 0;
+      text-align: center;
       color: #222;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     header {
-      background: #1f1f1f;
+      background-color: #222;
       color: white;
-      width: 100%;
-      padding: 25px 0;
-      text-align: center;
+      padding: 40px 20px;
     }
 
     header h1 {
-      margin: 0;
-      font-size: 2.8rem;
+      font-size: 3rem;
+      margin-bottom: 10px;
     }
 
-    .hero-img {
-      margin-top: 30px;
-      width: 90%;
+    .hero {
       max-width: 800px;
-      border-radius: 12px;
-      box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+      margin: 40px auto;
     }
 
-    .menu {
+    .hero img {
+      width: 100%;
+      max-width: 700px;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .buttons {
       margin: 40px auto;
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
-      gap: 20px;
-      max-width: 800px;
+      gap: 30px;
+      flex-wrap: wrap;
     }
 
-    .menu a, .dropdown-btn {
-      text-decoration: none;
-      padding: 15px 25px;
-      background: #4CAF50;
+    .buttons a {
+      background-color: #00796b;
       color: white;
+      padding: 15px 30px;
       border-radius: 10px;
-      font-size: 1.1rem;
-      transition: background 0.3s ease, transform 0.2s;
-      cursor: pointer;
+      text-decoration: none;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
     }
 
-    .menu a:hover, .dropdown-btn:hover {
-      background: #388e3c;
+    .buttons a:hover {
+      background-color: #004d40;
       transform: scale(1.05);
     }
 
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      top: 55px;
-      left: 0;
-      background-color: #4CAF50;
-      border-radius: 10px;
-      min-width: 160px;
-      z-index: 1;
-      flex-direction: column;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .dropdown-content a {
-      color: white;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-      transition: background 0.2s;
-    }
-
-    .dropdown-content a:hover {
-      background-color: #388e3c;
-    }
-
-    .dropdown:hover .dropdown-content {
-      display: flex;
-    }
-
     footer {
-      margin-top: auto;
-      padding: 25px;
-      text-align: center;
+      margin-top: 80px;
+      padding: 20px;
       font-size: 0.9rem;
-      color: #777;
+      color: #888;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Memestash</h1>
-    <p>Your stash of spicy memes</p>
+    <p>Your favorite meme archive 📦</p>
   </header>
 
-  <img src="https://i.imgur.com/t6MFtPy.jpeg" alt="Memestash Banner" class="hero-img"/>
-
-  <div class="menu">
-    <a href="https://forms.gle/9RP2TLHD4mceKhiY8" target="_blank">Upload Meme</a>
-    <a href="memestash.html">View Memes</a>
-
-    <!-- Dropdown Menu -->
-    <div class="dropdown">
-      <div class="dropdown-btn">More</div>
-      <div class="dropdown-content">
-        <a href="rate.html">Rate Memes</a>
-        <a href="comment.html">Comment</a>
-        <a href="about.html">About</a>
-        <a href="contact.html">Contact</a>
-      </div>
-    </div>
+  <div class="hero">
+    <img src="images/banner.jpg" alt="Memestash Banner" />
   </div>
 
-  <footer>
-    &copy; 2025 Memestash. All memes belong to their rightful creators.
-  </footer>
+  <div class="buttons">
+    <a href="https://forms.gle/9RP2TLHD4mceKhiY8" target="_blank">Upload Meme</a>
+    <a href="memestash.html">View Memes</a>
+  </div>
+
+  <footer>&copy; 2025 Memestash by Baconyy11</footer>
 </body>
 </html>
