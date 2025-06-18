@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MemeStash - Uploaded Memes</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    #memesGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 800px;
+    }
+    .memeItem img {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .memeItem img:hover {
+      transform: scale(1.05);
+    }
+    #errorMsg {
+      color: red;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Uploaded Memes</h1>
+  <div id="memesGrid"></div>
+  <div id="errorMsg"></div>
+
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.3/dist/umd/supabase.min.js"></script>
+  <script>
+    const supabaseUrl = 'https://tyympdfmtwxbzkarolrm.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5eW1wZGZtdHd4YnprYXJvbHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNzQ2ODYsImV4cCI6MjA2NTg1MDY4Nn0.CJSweUgVGLHP2bTg8QwfMpojHrS76hmThN86T4dA33Y'
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+    const memesGrid = document.getElementById('memesGrid')
+    const errorMsg = document.getElementById('errorMsg')
+
+    async function loadMemes() {
+      errorMsg.textContent = ''
+      memesGrid.innerHTML = 'Loading...'
+
+      // List files from the 'memes' bucket
+      const { data, error } = await supabase.storage.from('memes').list('', {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      })
+
+      if (error) {
+        memesGrid.innerHTML = ''
+        errorMsg.textContent = 'Failed to load memes: ' + error.message
+        return
+      }
+
+      if (!data.length) {
+        memesGrid.innerHTML = '<p>No memes uploaded yet.</p>'
+        return
+      }
+
+      memesGrid.innerHTML = ''
+      // For each file, get the public URL and create an image element
+      for (const file of data) {
+        // Generate a public URL for the file
+        const { data: publicUrlData } = supabase.storage.from('memes').getPublicUrl(file.name)
+        const url = publicUrlData.publicUrl
+
+        // Create a container div
+        const div = document.createElement('div')
+        div.className = 'memeItem'
+
+        // Create the image element
+        const img = document.createElement('img')
+        img.src = url
+        img.alt = file.name
+
+        // Optional: open image in new tab when clicked
+        img.addEventListener('click', () => {
+          window.open(url, '_blank')
+        })
+
+        div.appendChild(img)
+        memesGrid.appendChild(div)
+      }
+    }
+
+    loadMemes()
+  </script>
+</body>
+</html>
