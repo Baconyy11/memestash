@@ -2,11 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Display Uploaded Meme</title>
+  <title>MemeStash</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #upload-form {
+      margin-bottom: 20px;
+    }
+    input[type="file"] {
+      margin: 10px;
+    }
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+    .gallery img {
+      max-width: 200px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+  </style>
 </head>
 <body>
-  <h1>Your Uploaded Meme</h1>
-  <img id="uploaded-image" alt="Uploaded Meme" style="max-width: 500px;" />
+  <h1>📤 MemeStash</h1>
+
+  <form id="upload-form">
+    <input type="file" id="file-input" accept="image/*" required />
+    <button type="submit">Upload Meme</button>
+  </form>
+
+  <div class="gallery" id="gallery"></div>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -15,24 +50,75 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5eW1wZGZtdHd4YnprYXJvbHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNzQ2ODYsImV4cCI6MjA2NTg1MDY4Nn0.CJSweUgVGLHP2bTg8QwfMpojHrS76hmThN86T4dA33Y'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    async function showImage() {
-      // Replace this with your actual uploaded file name
-      const fileName = 'your-uploaded-image.png'
+    const gallery = document.getElementById('gallery')
+    const fileInput = document.getElementById('file-input')
+    const uploadForm = document.getElementById('upload-form')
 
-      const { data, error } = supabase
-        .storage
-        .from('memes')
-        .getPublicUrl(fileName)
+    // Upload meme
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const file = fileInput.files[0]
+      if (!file) return alert('Please select a file.')
 
+      const fileName = `${Date.now()}_${file.name}`
+
+      const { error } = await supabase.storage.from('memes').upload(fileName, file)
       if (error) {
-        console.error('Error fetching image URL:', error)
+        alert('Upload failed: ' + error.message)
         return
       }
 
-      document.getElementById('uploaded-image').src = data.publicUrl
+      fileInput.value = ''
+      await loadMemes()
+    })
+
+    // Load and display memes
+    async function loadMemes() {
+      gallery.innerHTML = ''
+
+      let allFiles = []
+      let page = 0
+      const pageSize = 100
+      let done = false
+
+      while (!done) {
+        const { data, error } = await supabase
+          .storage
+          .from('memes')
+          .list('', { limit: pageSize, offset: page * pageSize })
+
+        if (error) {
+          console.error('Error listing files:', error)
+          break
+        }
+
+        if (!data.length) {
+          done = true
+          break
+        }
+
+        allFiles = allFiles.concat(data)
+        page++
+      }
+
+      for (const file of allFiles.reverse()) {
+        const { data: urlData } = supabase
+          .storage
+          .from('memes')
+          .getPublicUrl(file.name)
+
+        const img = document.createElement('img')
+        img.src = urlData.publicUrl
+        img.alt = file.name
+        gallery.appendChild(img)
+      }
     }
 
-    showImage()
+    // Auto-refresh every 10 seconds
+    setInterval(loadMemes, 10000)
+
+    // Initial load
+    loadMemes()
   </script>
 </body>
 </html>
