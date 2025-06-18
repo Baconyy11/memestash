@@ -28,6 +28,11 @@
       color: #333;
       margin-bottom: 1rem;
     }
+    input[type="file"] {
+      display: block;
+      margin: 1rem auto;
+      padding: 0.5rem;
+    }
     button {
       background: #4f46e5;
       color: white;
@@ -41,19 +46,69 @@
     button:hover {
       background: #4338ca;
     }
+    .status {
+      margin-top: 1rem;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Upload a Meme</h1>
-    <!-- File input removed for this minimal version -->
+    <input type="file" id="fileInput" accept="image/*" />
     <button id="uploadBtn">Upload</button>
+    <div id="status" class="status"></div>
   </div>
 
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.3/dist/umd/supabase.min.js"></script>
   <script>
-    document.getElementById('uploadBtn').addEventListener('click', () => {
-      // Redirect immediately to uploadtwo.html
-      window.location.href = 'uploadtwo.html'
+    const supabaseUrl = 'https://tyympdfmtwxbzkarolrm.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5eW1wZGZtdHd4YnprYXJvbHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNzQ2ODYsImV4cCI6MjA2NTg1MDY4Nn0.CJSweUgVGLHP2bTg8QwfMpojHrS76hmThN86T4dA33Y'
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+    const fileInput = document.getElementById('fileInput')
+    const uploadBtn = document.getElementById('uploadBtn')
+    const status = document.getElementById('status')
+
+    uploadBtn.addEventListener('click', async () => {
+      status.textContent = ''
+      status.style.color = ''
+
+      const file = fileInput.files[0]
+
+      if (!file) {
+        status.textContent = '❌ Please select a file first.'
+        status.style.color = 'red'
+        return
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        status.textContent = '❌ File too large. Max 10MB allowed.'
+        status.style.color = 'red'
+        return
+      }
+
+      const fileName = `${Date.now()}_${file.name}`
+
+      status.textContent = 'Uploading...'
+      status.style.color = 'black'
+
+      const { error } = await supabase.storage.from('memes').upload(fileName, file)
+
+      if (error) {
+        status.textContent = `❌ Upload failed: ${error.message}`
+        status.style.color = 'red'
+      } else {
+        status.textContent = '✅ Upload successful! Redirecting...'
+        status.style.color = 'green'
+        fileInput.value = ''
+
+        // Redirect after a short delay so user sees the success message
+        setTimeout(() => {
+          window.location.href = 'uploadtwo.html'
+        }, 1500)
+      }
     })
   </script>
 </body>
