@@ -6,18 +6,16 @@
   <style>
     body {
       font-family: sans-serif;
+      background: #fafafa;
+      padding: 20px;
       text-align: center;
-      background: #f0f0f0;
-    }
-    h1 {
-      margin-top: 20px;
     }
     .gallery {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 15px;
-      padding: 20px;
+      margin-top: 20px;
     }
     .gallery img {
       max-width: 200px;
@@ -27,39 +25,52 @@
   </style>
 </head>
 <body>
-  <h1>Uploaded Memes</h1>
-  <div class="gallery" id="gallery"></div>
+  <h1>🖼️ All Memes from Supabase</h1>
+  <div class="gallery" id="gallery">Loading memes...</div>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const supabaseUrl = 'https://tyympdfmtwxbzkarolrm.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5eW1wZGZtdHd4YnprYXJvbHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNzQ2ODYsImV4cCI6MjA2NTg1MDY4Nn0.CJSweUgVGLHP2bTg8QwfMpojHrS76hmThN86T4dA33Y'
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = createClient(
+      'https://tyympdfmtwxbzkarolrm.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5eW1wZGZtdHd4YnprYXJvbHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNzQ2ODYsImV4cCI6MjA2NTg1MDY4Nn0.CJSweUgVGLHP2bTg8QwfMpojHrS76hmThN86T4dA33Y'
+    )
+
+    const gallery = document.getElementById('gallery')
 
     async function loadMemes() {
-      const { data, error } = await supabase
+      gallery.innerHTML = ''
+
+      const { data: files, error } = await supabase
         .storage
         .from('memes')
-        .list('', { limit: 100, offset: 0 })
+        .list('', { limit: 1000 })
 
       if (error) {
-        console.error('Error listing files:', error)
+        gallery.textContent = '❌ Failed to load memes.'
+        console.error('List error:', error)
         return
       }
 
-      const gallery = document.getElementById('gallery')
+      if (files.length === 0) {
+        gallery.textContent = '😕 No memes found.'
+        return
+      }
 
-      for (const file of data) {
-        const { data: urlData } = supabase
+      for (const file of files) {
+        const { data: urlData, error: urlError } = supabase
           .storage
           .from('memes')
           .getPublicUrl(file.name)
 
+        if (urlError) {
+          console.error('URL error for', file.name, ':', urlError)
+          continue
+        }
+
         const img = document.createElement('img')
         img.src = urlData.publicUrl
         img.alt = file.name
-
         gallery.appendChild(img)
       }
     }
