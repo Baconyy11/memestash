@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload Meme | MemeStash</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    input[type="file"] {
+      display: block;
+      margin: 1rem auto;
+      padding: 0.5rem;
+    }
+    button {
+      background: #4f46e5;
+      color: white;
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #4338ca;
+    }
+    .note {
+      margin-top: 1rem;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .success {
+      margin-top: 1rem;
+      color: green;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upload a Meme</h1>
+    <input type="file" id="fileInput" accept="image/*">
+    <button onclick="uploadMeme()">Upload</button>
+    <div id="status" class="success"></div>
+    <p class="note">File size limit: 10MB • JPG, PNG, GIF supported</p>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const supabaseUrl = 'https://tyympdfmtwxbzkarolrm.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5eW1wZGZtdHd4YnprYXJvbHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAyNzQ2ODYsImV4cCI6MjA2NTg1MDY4Nn0.CJSweUgVGLHP2bTg8QwfMpojHrS76hmThN86T4dA33Y'
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    async function uploadMeme() {
+      const input = document.getElementById('fileInput')
+      const status = document.getElementById('status')
+      const file = input.files[0]
+
+      if (!file) {
+        status.textContent = 'Please choose a file first.'
+        status.style.color = 'red'
+        return
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        status.textContent = 'File is too large. Max 10MB allowed.'
+        status.style.color = 'red'
+        return
+      }
+
+      const fileName = `${Date.now()}_${file.name}`
+
+      const { error } = await supabase.storage.from('memes').upload(fileName, file)
+
+      if (error) {
+        status.textContent = 'Upload failed: ' + error.message
+        status.style.color = 'red'
+      } else {
+        status.textContent = 'Meme uploaded successfully!'
+        status.style.color = 'green'
+        input.value = ''
+      }
+    }
+  </script>
+</body>
+</html>
